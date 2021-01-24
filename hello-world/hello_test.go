@@ -28,4 +28,11 @@ func TestHello(t *testing.T) {
 
 		assert.Equal(t, expected, got)
 	})
+
+	t.Run("in french", func(t *testing.T) {
+		got := Hello("lauren", "French")
+		expected := "bonjour, lauren"
+
+		assert.Equal(t, expected, got)
+	})
 }
