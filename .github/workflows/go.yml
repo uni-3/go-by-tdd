@@ -1,4 +1,4 @@
-name: go-test
+name: go
 on:
   push:
     paths-ignore: 
@@ -7,7 +7,22 @@ on:
     paths-ignore: 
       - 'go.mod'
 jobs:
-  build:
+  go-lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: setup-go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
+    - name: linter
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: v1.29
+
+  go-test:
+    name: test with coverage
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -16,4 +31,8 @@ jobs:
       with:
         go-version: 1.15
     - name: test
-      run: go test -v ./...
+      run: go test -race -covermode atomic -coverprofile=coverprofile ./...
+    - name: send-coverage
+      uses: shogo82148/actions-goveralls@v1
+      with:
+        path-to-profile: coverprofile
