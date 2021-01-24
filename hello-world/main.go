@@ -6,6 +6,9 @@ const englishHelloPrefix = "hello, "
 
 // domain, available for test
 func Hello(name string) string {
+	if name == "" {
+		name = "world"
+	}
 	return englishHelloPrefix + name
 }
 

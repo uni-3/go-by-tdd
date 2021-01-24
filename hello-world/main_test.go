@@ -13,7 +13,12 @@ func TestHello(t *testing.T) {
 		expected := "hello, Chris"
 
 		assert.Equal(t, expected, got)
-
 	})
 
+	t.Run("when an emply string is supplied", func(t *testing.T) {
+		got := Hello("")
+		expected := "hello, world"
+
+		assert.Equal(t, expected, got)
+	})
 }
