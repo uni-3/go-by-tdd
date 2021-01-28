@@ -78,7 +78,7 @@ func TestUpdate(t *testing.T) {
 		value := "this is just a test"
 		dictionary := Dictionary{}
 		err := dictionary.Update(key, value)
-		assert.Error(t, err, ErrWordDoesNotExists)
+		assert.Equal(t, err, ErrWordDoesNotExists)
 	})
 }
 
@@ -88,8 +88,9 @@ func TestDelete(t *testing.T) {
 		key := "test"
 		value := "this is just a test"
 		dictionary := Dictionary{key: value}
-		err := dictionary.Delete(key)
-		assert.NoError(t, err)
+		dictionary.Delete(key)
 
+		_, err := dictionary.Search(key)
+		assert.Equal(t, err, ErrNotFound)
 	})
 }

@@ -41,6 +41,7 @@ func (d Dictionary) Add(key string, value string) error {
 	return nil
 }
 
+// Update 存在するkeyの更新。無いときはエラー
 func (d Dictionary) Update(key string, value string) error {
 	_, err := d.Search(key)
 
@@ -56,6 +57,7 @@ func (d Dictionary) Update(key string, value string) error {
 	return nil
 }
 
-func (d Dictionary) Delete(key string) error {
-	return nil
+// Delete 指定したkeyを削除。dがnil or 存在しないkeyのときはなにもしない
+func (d Dictionary) Delete(key string) {
+	delete(d, key)
 }
