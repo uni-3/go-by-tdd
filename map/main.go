@@ -1,10 +1,18 @@
 package main
 
-import "errors"
-
 type Dictionary map[string]string
 
-var ErrNotFound = errors.New("could not find the word you were looking for")
+const (
+	ErrNotFound          = DictionaryErr("could not find the word you were looking for")
+	ErrWordExists        = DictionaryErr("cannot add key because it already exists")
+	ErrWordDoesNotExists = DictionaryErr("cannot update key because it does not exists")
+)
+
+type DictionaryErr string
+
+func (e DictionaryErr) Error() string {
+	return string(e)
+}
 
 // mapは参照型のため、データ構造への参照を渡すため、ポインタを使わなくても変更、取得時のアドレスが一緒になる
 
@@ -17,7 +25,37 @@ func (d Dictionary) Search(key string) (string, error) {
 	return value, nil
 }
 
-// Add keyとvalueの追加
-func (d Dictionary) Add(key string, value string) {
-	d[key] = value
+// Add keyとvalueの追加。なかったら追加。すでにあれば、なにもしない
+func (d Dictionary) Add(key string, value string) error {
+	_, err := d.Search(key)
+
+	switch err {
+	case ErrNotFound:
+		d[key] = value
+	case nil:
+		return ErrWordExists
+	default:
+		return err
+	}
+
+	return nil
+}
+
+func (d Dictionary) Update(key string, value string) error {
+	_, err := d.Search(key)
+
+	switch err {
+	case ErrNotFound:
+		return ErrWordDoesNotExists
+	case nil:
+		d[key] = value
+	default:
+		return err
+	}
+
+	return nil
+}
+
+func (d Dictionary) Delete(key string) error {
+	return nil
 }
