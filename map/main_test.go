@@ -16,7 +16,6 @@ func TestSearch(t *testing.T) {
 		expected := "this is just a test"
 
 		assert.Equal(t, expected, got)
-
 	})
 
 	t.Run("not exist key", func(t *testing.T) {
@@ -31,7 +30,8 @@ func TestAdd(t *testing.T) {
 
 	t.Run("new key", func(t *testing.T) {
 		dictionary := Dictionary{}
-		dictionary.Add("test", "this is just a test")
+		err := dictionary.Add("test", "this is just a test")
+		assert.NoError(t, err)
 
 		got, err := dictionary.Search("test")
 		assert.NoError(t, err)
@@ -45,7 +45,7 @@ func TestAdd(t *testing.T) {
 		value := "this is just a test"
 		dictionary := Dictionary{key: value}
 		err := dictionary.Add(key, "new test")
-		assert.Error(t, err, ErrWordExists)
+		assert.Equal(t, err, ErrWordExists)
 
 		// testの値が更新されないこと
 		got, err := dictionary.Search("test")
@@ -70,7 +70,6 @@ func TestUpdate(t *testing.T) {
 		assert.NoError(t, err)
 		expected := "new test"
 		assert.Equal(t, expected, got)
-
 	})
 
 	t.Run("new key", func(t *testing.T) {
@@ -89,7 +88,6 @@ func TestDelete(t *testing.T) {
 		value := "this is just a test"
 		dictionary := Dictionary{key: value}
 		dictionary.Delete(key)
-
 		_, err := dictionary.Search(key)
 		assert.Equal(t, err, ErrNotFound)
 	})
