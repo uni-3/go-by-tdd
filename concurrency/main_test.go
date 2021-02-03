@@ -1,4 +1,4 @@
-package concarrency
+package concurrency
 
 import (
 	"reflect"
@@ -14,7 +14,7 @@ func mockWebsiteChecker(url string) bool {
 }
 
 // Test .
-func Test(t *testing.T) {
+func TestCheckWebsites(t *testing.T) {
 	t.Run("check websites", func(t *testing.T) {
 		websites := []string{
 			"http://google.com",
