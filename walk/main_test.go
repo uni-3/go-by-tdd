@@ -70,14 +70,6 @@ func TestWalk(t *testing.T) {
 			},
 			ExpectedCalls: []string{"london", "reykjavik"},
 		},
-		{
-			Name: "map",
-			Input: map[string]string{
-				"foo": "bar",
-				"baz": "boz",
-			},
-			ExpectedCalls: []string{"bar", "boz"},
-		},
 	}
 
 	for _, test := range cases {
@@ -91,8 +83,77 @@ func TestWalk(t *testing.T) {
 			if !reflect.DeepEqual(got, test.ExpectedCalls) {
 				t.Errorf("got %v want %v", got, test.ExpectedCalls)
 			}
-
 		})
 	}
 
+	// mapは順序保証しないので、上のテスト方法ではgotの中身が変わる
+	t.Run("with map", func(t *testing.T) {
+		aMap := map[string]string{
+			"foo": "bar",
+			"baz": "boz",
+		}
+
+		var got []string
+		walk(aMap, func(input string) {
+			got = append(got, input)
+		})
+		assertContains(t, got, "bar")
+		assertContains(t, got, "boz")
+	})
+
+	t.Run("with channels", func(t *testing.T) {
+		aChannel := make(chan Profile)
+
+		go func() {
+			aChannel <- Profile{33, "berlin"}
+			aChannel <- Profile{34, "katowice"}
+			close(aChannel)
+		}()
+
+		var got []string
+		want := []string{"berlin", "katowice"}
+
+		walk(aChannel, func(input string) {
+			got = append(got, input)
+		})
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("with function", func(t *testing.T) {
+		aFunction := func() (Profile, Profile) {
+			return Profile{
+					33, "berlin",
+				},
+				Profile{
+					34, "katowice",
+				}
+		}
+
+		var got []string
+		want := []string{"berlin", "katowice"}
+
+		walk(aFunction, func(input string) {
+			got = append(got, input)
+		})
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+}
+
+func assertContains(t testing.TB, haystack []string, needle string) {
+	t.Helper()
+	contains := false
+	for _, x := range haystack {
+		if x == needle {
+			contains = true
+		}
+	}
+	if !contains {
+		t.Errorf("expected %+v to contain %q but it didn't", haystack, needle)
+	}
 }
