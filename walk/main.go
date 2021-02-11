@@ -7,19 +7,29 @@ import (
 func walk(x interface{}, fn func(input string)) {
 	val := getValue(x)
 
+	walkValue := func(value reflect.Value) {
+		walk(value.Interface(), fn)
+	}
+
 	numberOfValues := 0
 	var getField func(int) reflect.Value
 
 	switch val.Kind() {
 	case reflect.String:
 		fn(val.String())
-	case reflect.Slice:
-		numberOfValues = val.Len()
-		getField = val.Index
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < val.Len(); i++ {
+			walkValue(val.Index(i))
+		}
 	// struct内も再帰的に実行
 	case reflect.Struct:
-		numberOfValues = val.NumField()
-		getField = val.Field
+		for i := 0; i < val.NumField(); i++ {
+			walkValue(val.Field(i))
+		}
+	case reflect.Map:
+		for _, key := range val.MapKeys() {
+			walkValue(val.MapIndex(key))
+		}
 	}
 
 	for i := 0; i < numberOfValues; i++ {
