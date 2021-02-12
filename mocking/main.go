@@ -21,13 +21,16 @@ type Sleeper interface {
 	Sleep()
 }
 
+/*
 type DefaultSleeper struct{}
 
 func (s *DefaultSleeper) Sleep() {
 	time.Sleep(1 * time.Second)
 }
+*/
 
 // mock
+/*
 type SpySleeper struct {
 	Calls int
 }
@@ -35,6 +38,7 @@ type SpySleeper struct {
 func (s *SpySleeper) Sleep() {
 	s.Calls++
 }
+*/
 
 type CountdownOperationSpy struct {
 	Calls []string

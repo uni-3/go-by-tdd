@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -27,15 +28,21 @@ func ConfigurableRacer(a, b string, timeout time.Duration) (string, error) {
 func ping(url string) chan struct{} {
 	ch := make(chan struct{})
 	go func() {
-		http.Get(url)
+		if _, err := http.Get(url); err != nil {
+			log.Fatal(err)
+		}
 		close(ch)
 	}()
 	return ch
 }
 
+/*
 func measureResponseTime(url string) time.Duration {
 	start := time.Now()
-	http.Get(url)
+	if _, err := http.Get(url); err != nil {
+		log.Fatal(err)
+	}
 	duration := time.Since(start)
 	return duration
 }
+*/
