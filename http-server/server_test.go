@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,6 +15,7 @@ func TestGETPlayers(t *testing.T) {
 			"Pepper": 20,
 			"Floyd":  10,
 		},
+		nil,
 	}
 	server := &PlayerServer{&store}
 
@@ -72,10 +74,44 @@ func TestGETPlayers(t *testing.T) {
 				res := httptest.NewRecorder()
 				server.ServeHTTP(res, req)
 
-				assert.Equal(t, test.status, res.Code, "check for response status")
+				assert.Equal(t, res.Code, test.status, "check for response status")
 			})
 		}
 	})
+}
+
+func TestStoreWins(t *testing.T) {
+	store := StubPlayerStore{
+		map[string]int{
+			"Pepper": 20,
+			"Floyd":  10,
+		},
+		nil,
+	}
+	server := &PlayerServer{&store}
+
+	cases := []struct {
+		name     string
+		expected string
+	}{
+		{
+			name:     "accepted recodes win on POST",
+			expected: "Pepper",
+		},
+	}
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			player := "Pepper"
+			req := newPostWinRequest(player)
+			res := httptest.NewRecorder()
+
+			server.ServeHTTP(res, req)
+
+			assert.Equal(t, http.StatusAccepted, res.Code, "check for status")
+			assert.Len(t, store.winCalls, 1, "check for length")
+			assert.Equal(t, test.expected, store.winCalls[0], "check for post name")
+		})
+	}
 }
 
 func newGetScoreRequest(name string) *http.Request {
@@ -83,10 +119,20 @@ func newGetScoreRequest(name string) *http.Request {
 	return req
 }
 
+func newPostWinRequest(name string) *http.Request {
+	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", name), nil)
+	return req
+}
+
 type StubPlayerStore struct {
-	scores map[string]int
+	scores   map[string]int
+	winCalls []string
 }
 
 func (s *StubPlayerStore) GetPlayerScore(name string) int {
 	return s.scores[name]
+}
+
+func (s *StubPlayerStore) RecordWin(name string) {
+	s.winCalls = append(s.winCalls, name)
 }
