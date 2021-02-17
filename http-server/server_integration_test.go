@@ -11,7 +11,7 @@ import (
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	// mainで定義されているものを使う
 	store := NewInMemoryPlayerStore()
-	server := PlayerServer{store}
+	server := NewPlayerServer(store)
 
 	cases := []struct {
 		name string

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -17,7 +18,7 @@ func TestGETPlayers(t *testing.T) {
 		},
 		nil,
 	}
-	server := &PlayerServer{&store}
+	server := NewPlayerServer(&store)
 
 	t.Run("200", func(t *testing.T) {
 		cases := []struct {
@@ -88,7 +89,7 @@ func TestStoreWins(t *testing.T) {
 		},
 		nil,
 	}
-	server := &PlayerServer{&store}
+	server := NewPlayerServer(&store)
 
 	cases := []struct {
 		name     string
@@ -114,15 +115,22 @@ func TestStoreWins(t *testing.T) {
 	}
 }
 
-// Test .
 func TestLeague(t *testing.T) {
 	store := StubPlayerStore{}
-	server := &PlayerServer{&store}
+	server := NewPlayerServer(&store)
+
 	t.Run("return 200 on league", func(t *testing.T) {
 		req, _ := http.NewRequest(http.MethodGet, "/league", nil)
 		res := httptest.NewRecorder()
 		server.ServeHTTP(res, req)
 		assert.Equal(t, http.StatusOK, res.Code)
+
+		var got []Player
+
+		err := json.NewDecoder(res.Body).Decode(&got)
+		if err != nil {
+			t.Fatalf("unable to parse response from server %q into slice of player, '%v", res.Body, err)
+		}
 	})
 }
 
