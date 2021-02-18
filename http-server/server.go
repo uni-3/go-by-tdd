@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const jsonContentType = "application/json"
+
 type Player struct {
 	Name string
 	Wins int
@@ -16,6 +18,7 @@ type Player struct {
 type PlayerStore interface {
 	GetPlayerScore(name string) int
 	RecordWin(name string)
+	GetLeague() []Player
 }
 
 type PlayerServer struct {
@@ -36,10 +39,9 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 }
 
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
-	leagueTable := []Player{
-		{"chris", 20},
-	}
-	w.WriteHeader(http.StatusOK)
+	leagueTable := p.store.GetLeague()
+	//w.WriteHeader(http.StatusOK)
+	w.Header().Set("content-type", jsonContentType)
 	if err := json.NewEncoder(w).Encode(leagueTable); err != nil {
 		log.Fatalf("cloud not encode %v", leagueTable)
 	}
@@ -62,6 +64,7 @@ func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
 		w.WriteHeader(http.StatusNotFound)
 	}
 
+	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, p.store.GetPlayerScore(player))
 }
 
