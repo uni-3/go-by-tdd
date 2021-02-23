@@ -1,11 +1,17 @@
 package main
 
+import "sync"
+
 // Counter .
 type Counter struct {
+	mu    sync.Mutex
 	value int
 }
 
 func (c *Counter) Inc() {
+	// muがlockされるとunlockされるまでgoroutineが止まる
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.value++
 
 }
